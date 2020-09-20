@@ -112,9 +112,8 @@ def draw_grid(win, rows, width):
     # Horizontal lines
     for i in range(rows):
         pygame.draw.line(win, GREY, (0, i * gap), (width, i * gap))
-    # Vertical lines
-    for j in range(rows):
-        pygame.draw.line(win, GREY, (j * gap, 0), (i * gap, width))
+        for j in range(rows):
+            pygame.draw.line(win, GREY, (j * gap, 0), (j * gap, width))
 
 # Create main draw function
 def draw(window, grid, rows, width):
