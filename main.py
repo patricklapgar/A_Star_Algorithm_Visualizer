@@ -34,53 +34,56 @@ class Node:
         self.width = width
         self.total_rows = total_rows
 
-        def get_position(self):
-            return self.row, self.col
+    def get_position(self):
+        return self.row, self.col
 
-        # Methods to open and close different nodes
-        def is_closed(self):
-            return self.color == RED
+    # Methods to open and close different nodes
+    def is_closed(self):
+        return self.color == RED
 
-        def is_open(self):
-            return self.color == GREEN
+    def is_open(self):
+        return self.color == GREEN
 
-        def is_barrier(self):
-            return self.color == BLACK
+    def is_barrier(self):
+        return self.color == BLACK
 
-        def is_start(self):
-            return self.color == ORANGE
+    def is_start(self):
+        return self.color == ORANGE
 
-        def is_end(self):
-            return self.color == TURQUOISE
+    def is_end(self):
+        return self.color == TURQUOISE
 
-        def reset(self):
-            self.color == WHITE
+    def reset(self):
+        self.color == WHITE
 
-        def make_closed(self):
-            self.color = RED
+    def make_start(self):
+        self.color = ORANGE
 
-        def make_open(self):
-            self.color = GREEN
+    def make_closed(self):
+        self.color = RED
 
-        def make_barrier(self):
-            self.color = BLACK
+    def make_open(self):
+        self.color = GREEN
 
-        def make_end(self):
-            self.color = TURQUOISE
+    def make_barrier(self):
+        self.color = BLACK
 
-        def make_path(self):
-            self.color = PURPLE
+    def make_end(self):
+        self.color = TURQUOISE
 
-        # Draw the nodes onto the grid
-        def draw(self, win):
-            pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
+    def make_path(self):
+        self.color = PURPLE
 
-        def update_neighbors(self, grid):
-            pass
-        
-        # Make a method name less than (lt for short) to compare two spots together and handle the logic
-        def __lt__(self, other):
-            return False
+    # Draw the nodes onto the grid
+    def draw_node(self, win):
+        pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
+
+    def update_neighbors(self, grid):
+        pass
+    
+    # Make a method name less than (lt for short) to compare two spots together and handle the logic
+    def __lt__(self, other):
+        return False
 
 
 # Heuristic function
@@ -101,7 +104,6 @@ def make_grid(rows, width):
             # Create node object and append it to the grid
             node = Node(i, j, gap, rows)
             grid[i].append(node)
-
     return grid
 
 # Draw grid lines
@@ -118,10 +120,57 @@ def draw_grid(win, rows, width):
 def draw(window, grid, rows, width):
     window.fill(WHITE)
     for row in grid:
-        for node in row:
-            node.draw(window)
+        for spot in row:
+            spot.draw_node(window)
     
     draw_grid(window, rows, width)
     pygame.display.update()
 
+def get_clicked_position(mouse_postion, rows, width):
+    gap = width // rows
+    y, x = mouse_postion
+    row = y // gap
+    col = x // gap
+    return row, col
+
+# Main function
+def main(window, width):
+    ROWS = 50
+    grid = make_grid(ROWS, width)
+
+    start_position = None
+    end_position = None
+    run = True
+    started = False
+
+    # Event loop
+    while run:
+        draw(window, grid, ROWS, width)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            
+            if started:
+                continue
+            
+            if pygame.mouse.get_pressed()[0]: # If the left mouse button was pressed
+                pos = pygame.mouse.get_pos()
+                row, col = get_clicked_position(pos, ROWS, width)  
+                node = grid[row][col]
+                if not start_position:
+                    start_position = node
+                    start_position.make_start()
+
+                elif not end_position:
+                    end_position = node
+                    end_position.make_end()
+
+                elif node != end_position and node != start_position:
+                    node.make_barrier()
+
+            elif pygame.mouse.get_pressed()[2]:  # If the right mouse button was pressed
+                pass
+
+    pygame.quit()
+main(WINDOW, WIDTH)
 
