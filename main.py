@@ -37,7 +37,7 @@ class Node:
         def get_position(self):
             return self.row, self.col
 
-        # Red nodes
+        # Methods to open and close different nodes
         def is_closed(self):
             return self.color == RED
 
@@ -73,4 +73,55 @@ class Node:
 
         # Draw the nodes onto the grid
         def draw(self, win):
-            pygame.draw.rect(win, self.color, ())
+            pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
+
+        def update_neighbors(self, grid):
+            pass
+        
+        # Make a method name less than (lt for short) to compare two spots together and handle the logic
+        def __lt__(self, other):
+            return False
+
+
+# Heuristic function
+def heuristic(point1, point2):
+    # Figure out the distance between points 1 and 2 by using Manhattan distance
+    x1, y1 = point1
+    x2, y2 = point2
+    return abs(x1 - x2) + abs(y1 - y2)
+
+# Grid function
+def make_grid(rows, width):
+    grid = []
+    gap = width // rows
+    for i in range(rows):
+        # Create nested lists of Node objects inside
+        grid.append([])
+        for j in range(rows):
+            # Create node object and append it to the grid
+            node = Node(i, j, gap, rows)
+            grid[i].append(node)
+
+    return grid
+
+# Draw grid lines
+def draw_grid(win, rows, width):
+    gap = width // rows
+    # Horizontal lines
+    for i in range(rows):
+        pygame.draw.line(win, GREY, (0, i * gap), (width, i * gap))
+    # Vertical lines
+    for j in range(rows):
+        pygame.draw.line(win, GREY, (j * gap, 0), (i * gap, width))
+
+# Create main draw function
+def draw(window, grid, rows, width):
+    window.fill(WHITE)
+    for row in grid:
+        for node in row:
+            node.draw(window)
+    
+    draw_grid(window, rows, width)
+    pygame.display.update()
+
+
