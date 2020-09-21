@@ -79,7 +79,20 @@ class Node:
         pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.width))
 
     def update_neighbors(self, grid):
-        pass
+        self.neighbors = []
+        # If there are still rows to traverse and if the surrounding block is not a barrier
+        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier(): # Direction: DOWN
+            # Add that block to the list of neighbors
+            self.neighbors.append(grid[self.row + 1][self.col])
+        
+        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): # Direction: UP
+            self.neighbors.append(grid[self.row - 1][self.col])
+        
+        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier(): # Direction: RIGHT
+            self.neighbors.append(grid[self.row][self.col + 1])
+        
+        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): # Direction: LEFT
+            self.neighbors.append(grid[self.row][self.col - 1])
     
     # Make a method name less than (lt for short) to compare two spots together and handle the logic
     def __lt__(self, other):
@@ -92,6 +105,22 @@ def heuristic(point1, point2):
     x1, y1 = point1
     x2, y2 = point2
     return abs(x1 - x2) + abs(y1 - y2)
+
+# Algorithm visualization function
+def algorithm(draw, grid, start, end):
+    count = 0
+    open_set = PriorityQueue()
+    open_set.put((0, count, start))
+    # Dictionary that keeps track of the previous node
+    came_from = {}
+    # G score and F score
+    g_score = {node: float("inf") for row in grid for node in row}
+    g_score[start] = 0
+    f_score = {node: float("inf") for row in grid for node in row}
+    f_score[start] = heuristic(start.get_position(), end.get_position())
+
+    # Set that keeps track of everything in the priority queue
+    open_set_hash = {start}
 
 # Grid function
 def make_grid(rows, width):
@@ -176,6 +205,15 @@ def main(window, width):
                     start_position = None
                 elif node == end_position:
                     end_position = None
+
+            # Activate A* Algorithm
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and not started:
+                    for row in grid:
+                        for node in row:
+                            node.update_neighbors()
+                    
+                    algorithm(lambda: draw(window, grid, ROWS, width), grid, start_position, end_position)
 
     pygame.quit()
 main(WINDOW, WIDTH)
