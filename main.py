@@ -106,6 +106,12 @@ def heuristic(point1, point2):
     x2, y2 = point2
     return abs(x1 - x2) + abs(y1 - y2)
 
+def reconstruct_path(came_from, current, draw):
+    while current in came_from:
+        current = came_from[current]
+        current.make_path()
+        draw()
+
 # Algorithm visualization function
 def algorithm(draw, grid, start, end):
     count = 0
@@ -132,7 +138,8 @@ def algorithm(draw, grid, start, end):
         open_set_hash.remove(current)
 
         if current == end:
-            # TODO: Make path
+            reconstruct_path(came_from, end, draw)
+            end.make_end()
             return True
         
         for neighbor in current.neighbors:
@@ -152,7 +159,7 @@ def algorithm(draw, grid, start, end):
 
         if current != start:
             current.make_closed()
-            
+
     return False
 
 # Grid function
@@ -211,9 +218,6 @@ def main(window, width):
             if event.type == pygame.QUIT:
                 run = False
             
-            if started:
-                continue
-            
             if pygame.mouse.get_pressed()[0]: # If the left mouse button was pressed
                 pos = pygame.mouse.get_pos()
                 row, col = get_clicked_position(pos, ROWS, width)  
@@ -241,12 +245,16 @@ def main(window, width):
 
             # Activate A* Algorithm
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not started:
+                if event.key == pygame.K_SPACE and start_position and end_position:
                     for row in grid:
                         for node in row:
-                            node.update_neighbors()
+                            node.update_neighbors(grid)
                     
                     algorithm(lambda: draw(window, grid, ROWS, width), grid, start_position, end_position)
+                if event.key == pygame.K_c:
+                    start_position = None
+                    end_position = None
+                    grid = make_grid(ROWS, width)
 
     pygame.quit()
 main(WINDOW, WIDTH)
